@@ -1,0 +1,4 @@
+[root]
+name = "chip8remu"
+version = "0.1.0"
+

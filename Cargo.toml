@@ -1,0 +1,6 @@
+[package]
+name = "chip8remu"
+version = "0.1.0"
+authors = ["Kevin Hardy <hardy.kevin.c@gmail.com>"]
+
+[dependencies]
