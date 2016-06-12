@@ -57,7 +57,6 @@ impl Chip8 {
         let mut height = 0u8;
         let mut pixel = 0u8;
 
-        //Look at old incomplete C++ code for reference...
         //Fetch
         let mut opcode = (self.memory[self.PC as usize] as u16) << 8 | (self.memory[self.PC as usize + 1] as u16);
         //Decode/Execute
@@ -67,7 +66,7 @@ impl Chip8 {
                 opcode;
             },
             _ => {
-                println!("Can't find opcode: {}", opcode);
+                println!("Can't find opcode: 0x{}", opcode);
             }
         }
         //Timers 
