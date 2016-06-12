@@ -1,3 +1,6 @@
+/*  chip8.rs
+ *  Provides an implementation/interpreter of the chip8 system */
+
 pub struct Chip8 {
     pub fontset: [u8; 80],
     pub memory: [u8; 4096],
@@ -46,8 +49,9 @@ impl Default for Chip8 {
 }
 
 impl Chip8 {
-
-    fn emulate_cycle(self) {
+    //TODO: implement ROM loading and starting
+    //TODO: implement all opcodes, timers
+    pub fn emulate_cycle(self) {
         let mut x = 0u8;
         let mut y = 0u8;
         let mut height = 0u8;

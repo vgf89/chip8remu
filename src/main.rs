@@ -1,3 +1,6 @@
+/*  main.rs
+ *  Initlizes SDL and chip8, provides core "game loop" */
+
 extern crate sdl2;
 
 use std::path::Path;
@@ -47,9 +50,9 @@ fn main() {
     let mut events = ctx.event_pump().unwrap();
 
 
+
     //Initialize Chip8 system
     let mut core =  chip8::Chip8{..Default::default()};
-
 
     // loop until we receive a QuitEvent
     'event : loop {
@@ -59,7 +62,9 @@ fn main() {
                 _               => continue
             }
             //game loop code
-            //emulateCycle();
+            core.emulate_cycle();
+            //TODO: implement graphics output (helper function to take chip8 display, scale up, render to window)
+            //TODO: Implement input
         }
     }
 }
