@@ -54,17 +54,20 @@ fn main() {
     //Initialize Chip8 system
     let mut core =  chip8::Chip8{..Default::default()};
 
+    //Load ROM
+    core.load_rom();
+
     // loop until we receive a QuitEvent
     'event : loop {
         for event in events.poll_iter() {
             match event {
                 Event::Quit{..} => break 'event,
-                _               => continue
+                //"game loop" code
+                _               => {
+                    core.emulate_cycle();
+                    continue;
+                }
             }
-            //game loop code
-            core.emulate_cycle();
-            //TODO: implement graphics output (helper function to take chip8 display, scale up, render to window)
-            //TODO: Implement input
         }
     }
 }
