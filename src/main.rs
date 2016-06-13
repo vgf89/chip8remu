@@ -2,6 +2,7 @@
  *  Initlizes SDL and chip8, provides core "game loop" */
 
 extern crate sdl2;
+extern crate rand;
 
 use std::path::Path;
 
