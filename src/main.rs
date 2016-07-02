@@ -41,7 +41,7 @@ fn main() {
 
     for y in 0..32 {
         for x in 0..64 {
-            let _ = renderer.fill_rect(Rect::new(2*x, 2*y, 2, 2));
+            let _ = renderer.fill_rect(Rect::new(x, y, 1, 1));
         }
     }
 
@@ -58,6 +58,9 @@ fn main() {
     //Load ROM
     core.load_rom();
 
+
+    let mut j = 0u8;
+
     // loop until we receive a QuitEvent
     'event : loop {
         for event in events.poll_iter() {
@@ -66,6 +69,22 @@ fn main() {
                 //"game loop" code
                 _               => {
                     core.emulate_cycle();
+
+                    //Update display
+                    for (y, row) in core.display.iter().enumerate() {
+                        for (x, col) in row.iter().enumerate() {
+                            if *col {
+                                println!("test");
+                                let _ = renderer.set_draw_color(sdl2::pixels::Color::RGB(255, 255, 255));
+                            } else {
+                                let _ = renderer.set_draw_color(sdl2::pixels::Color::RGB(0, 0, 0));
+                            }
+                            let _ = renderer.fill_rect(Rect::new((x as u8 + j) as i32, y as i32, 1, 1));
+                        }
+                    }
+
+                    let _ = renderer.present();
+
                     continue;
                 }
             }

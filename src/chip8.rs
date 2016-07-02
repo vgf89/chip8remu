@@ -22,6 +22,7 @@ pub struct Chip8 {
     pub sp: u8,
     pub stack: [u16; 16],
     pub keyboard: [bool; 16],
+    //pub display: [[u8; 8]; 32],
     pub display: [[bool; 64]; 32],
 }
 
@@ -54,6 +55,7 @@ impl Default for Chip8 {
             stack: [0u16; 16],
             keyboard: [false; 16],
             display: [[false; 64]; 32],
+            //display: [[0u8; 8]; 32],
         }
     }
 }
@@ -62,7 +64,7 @@ impl Chip8 {
     /** Loads a (static) file into memory, at least for now */
     pub fn load_rom(&mut self) -> Result<(), Error> {
 
-        let mut f = try!(File::open("test2.ch8"));
+        let mut f = try!(File::open("trip8.ch8"));
         println!("Hello!");
         let mut i = 0;
         for byte in f.bytes() {
@@ -99,6 +101,7 @@ impl Chip8 {
                         //Clear display
                         println!("00E0");
                         self.display = [[false; 64]; 32];
+                        //self.display = [[0u8; 8]; 32];
                         self.pc += 2;
                     },
                     0x00EE => {
@@ -288,6 +291,7 @@ impl Chip8 {
             0x9000 => {
                 match opcode & 0x000F {
                     0x0000 => {
+                        // Skip next instruction if Vx != Vy
                         println!("9XY0");
                         let x = opcode & 0x0F00 >> 8;
                         let y = opcode & 0x00F0 >> 4;
@@ -324,9 +328,38 @@ impl Chip8 {
                 self.pc += 2;
             },
             0xD000 => {
+                // Display sprite starting at coordinates (Vx, Vy) at memory location I byte-length n, VF=1 if any active pixel overwritten
+                // Sprites are always 8 pixels wide, up to 15 pixels tall
+                // Sprites are XORed onto the display
                 println!("DXYN");
+                let x= opcode & 0x0F00 >> 8;
+                let y = opcode & 0x00F0 >> 4;
+                let n = opcode & 0x000F;
+                let mut ind = 0;
+                let mut oldByte : [bool; 8] = [false; 8];
+                let mut newByte : [bool; 8] = [false; 8];
+
+                
+                println!("D {0} {1} {2}", x, y, n);
+
+                while ind < n {
+
+                    // Save old byte at coordinates
+                    oldByte[0..8].clone_from_slice(&(self.display[(y + ind) as usize][x as usize .. (x+8) as usize]));
+                    // Write sprite byte
+                    for i in 0u8..8u8 {
+                        newByte[i as usize] = (self.memory[(self.i + ind) as usize] >> (7u8 - i)) == 1u8;
+                    }
+                    for (j, bit) in newByte.iter().enumerate() {
+                        self.display[(y + ind) as usize][(x as usize + j) as usize] = bit.clone();
+                        if self.display[(y + ind) as usize][(x as usize + j) as usize] != bit.clone() {
+                            self.v[15] = 1;
+                        }
+                    }
+                    ind += 1;
+                }
+
                 self.pc += 2;
-                //TODO
             },
             0xE000 => {
                 match opcode & 0x00FF {
