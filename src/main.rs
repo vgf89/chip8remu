@@ -6,10 +6,13 @@ extern crate rand;
 
 use std::path::Path;
 
-use self::sdl2::event::{Event,WindowEventId};
-use self::sdl2::rect::{Rect, Point};
-use self::sdl2::surface::{Surface,SurfaceRef};
-use self::sdl2::keyboard::Keycode;
+use sdl2::rect::{Point, Rect};
+use sdl2::pixels::Color;
+use sdl2::event::Event;
+use sdl2::mouse::MouseButton;
+use sdl2::keyboard::Keycode;
+use sdl2::video::{Window, WindowContext};
+use sdl2::render::{Canvas, Texture, TextureCreator};
 
 mod chip8;
 
@@ -19,34 +22,32 @@ fn main() {
     let video_ctx = ctx.video().unwrap();
 
     // Create a window
-    let window = match video_ctx.window("eg03", 128, 64).position_centered().opengl().build() {
-        Ok(window) => window,
-        Err(err) => panic!("failed to create window: {}", err)
-    };
+    let window = video_ctx
+        .window("", 64, 32)
+        .position_centered()
+        .build()
+        .unwrap();
 
     // Create a rendering context
-    let mut renderer = match window.renderer().build() {
-        Ok(renderer) => renderer,
-        Err(err) => panic!("failed to create renderer: {}", err)
-    };
+    let mut canvas = window.into_canvas().target_texture().present_vsync().build().unwrap();
 
     // Set the drawing color to black
-    let _ = renderer.set_draw_color(sdl2::pixels::Color::RGB(0, 0, 0));
+    let _ = canvas.set_draw_color(sdl2::pixels::Color::RGB(0, 0, 0));
 
     // Clear the buffer, using black
-    let _ = renderer.clear();
+    let _ = canvas.clear();
 
 
-    let _ = renderer.set_draw_color(sdl2::pixels::Color::RGB(255, 0, 255));
+    let _ = canvas.set_draw_color(sdl2::pixels::Color::RGB(255, 0, 255));
 
     for y in 0..32 {
         for x in 0..64 {
-            let _ = renderer.fill_rect(Rect::new(x, y, 1, 1));
+            let _ = canvas.fill_rect(Rect::new(x, y, 1, 1));
         }
     }
 
     // Swap out buffer for the present buffer, displaying it.
-    let _ = renderer.present();
+    let _ = canvas.present();
 
     let mut events = ctx.event_pump().unwrap();
 
@@ -59,34 +60,35 @@ fn main() {
     core.load_rom();
 
 
-    let mut j = 0u8;
-
     // loop until we receive a QuitEvent
     'event : loop {
         for event in events.poll_iter() {
             match event {
                 Event::Quit{..} => break 'event,
                 //"game loop" code
-                _               => {
+                Event::KeyDown{..} => {
                     core.emulate_cycle();
 
                     //Update display
                     for (y, row) in core.display.iter().enumerate() {
-                        for (x, col) in row.iter().enumerate() {
-                            if *col {
-                                println!("test");
-                                let _ = renderer.set_draw_color(sdl2::pixels::Color::RGB(255, 255, 255));
+                        for (x, pix) in row.iter().enumerate() {
+                            if *pix {
+                                let _ = canvas.set_draw_color(sdl2::pixels::Color::RGB(255, 255, 255));
                             } else {
-                                let _ = renderer.set_draw_color(sdl2::pixels::Color::RGB(0, 0, 0));
+                                let _ = canvas.set_draw_color(sdl2::pixels::Color::RGB(0, 0, 0));
                             }
-                            let _ = renderer.fill_rect(Rect::new((x as u8 + j) as i32, y as i32, 1, 1));
+                            let _ = canvas.fill_rect(Rect::new(x as i32, y as i32, 1, 1));
                         }
                     }
 
-                    let _ = renderer.present();
+                    let _ = canvas.present();
+
+                    core.dbg();
 
                     continue;
-                }
+                },
+
+                _ => {continue;}
             }
         }
     }
