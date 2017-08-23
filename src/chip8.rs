@@ -24,8 +24,8 @@ pub struct Chip8 {
     pub keyboard: [bool; 16],
     //pub display: [[u8; 8]; 32],
     pub display: [[bool; 64]; 32],
-    pub tinterval: u32,
-    pub tcount: u32,
+    pub tinterval: i32,
+    pub tcount: i32,
 }
 
 impl Default for Chip8 {
@@ -480,15 +480,15 @@ impl Chip8 {
             }
         }
         //Timers 
-        self.tcount += 1;
-        if self.tcount >= self.tinterval {
-            self.tcount = 0;
+        //self.tcount += 1;
+        //if self.tcount >= self.tinterval {
+            //self.tcount = 0;
             if self.dt > 0 {
                 self.dt -= 1;
             }
             if self.st > 0 {
                 self.st -= 1;
             }
-        }
+        //}
     }
 }
